@@ -9,10 +9,10 @@ import (
 var isOnline = true
 
 func main() {
-	http.HandleFunc("/api/greeting", greeting)
-	http.HandleFunc("/api/stop", stop)
-	http.HandleFunc("/api/health", health)
-	http.Handle("/", http.FileServer(assetFS()))
+	http.Handle("/api/greeting", loggingMiddleware(http.HandlerFunc(greeting)))
+	http.Handle("/api/stop", loggingMiddleware(http.HandlerFunc(stop)))
+	http.Handle("/api/health", loggingMiddleware(http.HandlerFunc(health)))
+	http.Handle("/", loggingMiddleware(http.FileServer(assetFS())))
 	fmt.Println("Web server running on port 8080")
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
@@ -42,4 +42,11 @@ func health(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(500)
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("HEADER:%s - METHOD:%s PATH:%s", r.Header, r.Method, r.RequestURI)
+		next.ServeHTTP(w, r)
+	})
 }
