@@ -56,6 +56,8 @@ objects:
             kind: DockerImage
             name: 'centos/go-toolset-7-centos7'
           incremental: true
+      triggers:
+        - type: ConfigChange
     status:
       lastVersion: 0
   - apiVersion: v1
